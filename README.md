@@ -15,7 +15,7 @@ The default TTS provider is MiniMax. First-run demos can use the built-in macOS 
 ## Install
 
 ```sh
-git clone <your-repo-url> tts-say
+git clone https://github.com/liteli1987gmail/tts-say.git
 cd tts-say
 ./install.sh
 ```
