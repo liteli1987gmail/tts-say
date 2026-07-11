@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "MiniMax 自动朗读",
+  "version": "1.0",
+  "description": "AI 聊天网页的回复自动用 MiniMax 人声朗读（需本地 tts_server 运行）",
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1:48765/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://chat.deepseek.com/*",
+        "https://www.doubao.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://www.kimi.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "MiniMax 自动朗读：点击开/关" }
+}

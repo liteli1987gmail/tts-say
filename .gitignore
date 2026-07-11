@@ -1,0 +1,6 @@
+.runtime/
+__pycache__/
+*.pyc
+*.bak-*
+.DS_Store
+产品想法.md

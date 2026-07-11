@@ -1,0 +1,4 @@
+interface:
+  display_name: "tts-say Installer"
+  short_description: "Install and repair tts-say on macOS"
+  default_prompt: "Use $tts-say-installer to install, diagnose, or repair tts-say on this Mac."
