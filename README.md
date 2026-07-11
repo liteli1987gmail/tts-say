@@ -17,13 +17,17 @@ The default TTS provider is MiniMax. First-run demos can use the built-in macOS 
 ```sh
 git clone https://github.com/liteli1987gmail/tts-say.git
 cd tts-say
+cp .env.example .env
 ./install.sh
 ```
+
+Open `.env` and fill in your own `MINIMAX_API_KEY` for MiniMax audio. You can leave it blank for a first-run demo with the built-in macOS voice.
 
 The installer handles:
 
 - macOS, Python, `afplay`, `say`, and `curl` checks
-- `MINIMAX_API_KEY` detection in `~/.serenity_env`
+- `.env` creation from `.env.example`
+- `MINIMAX_API_KEY` detection in `.env`
 - macOS `say` voice for first-run demos
 - LaunchAgent installation at `~/Library/LaunchAgents/com.terri.tts-say.plist`
 - local service check at `http://127.0.0.1:48765/ping`
@@ -144,6 +148,7 @@ user machine -> tts-say local client -> your relay -> MiniMax
 The user machine stores:
 
 ```sh
+cp .env.example .env
 TTS_SAY_RELAY_URL=https://your-domain.example/say
 TTS_SAY_TRIAL_TOKEN=demo-user-token
 ```

@@ -190,7 +190,7 @@ PY
 
 remove_key_if_requested() {
   [[ "$REMOVE_KEY" == "1" ]] || return 0
-  local env_file="$HOME/.serenity_env"
+  local env_file="$PROJECT_DIR/.env"
   [[ -f "$env_file" ]] || return 0
   log "Removing MINIMAX_API_KEY from $env_file"
   /usr/bin/python3 - "$env_file" <<'PY'

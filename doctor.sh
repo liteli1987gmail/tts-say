@@ -35,17 +35,21 @@ check_command say
 check_command curl
 
 section "Project Files"
-for file in tts_say.py tts_server.py claude_stop_hook.py codex_notify_tts.py codex_notify_wrapper.sh install_chrome_ext.sh chrome-ext/manifest.json relay/minimax_relay.py docs/TRIAL_RELAY.md docs/PROVIDERS.md; do
+for file in .env.example tts_say.py tts_server.py claude_stop_hook.py codex_notify_tts.py codex_notify_wrapper.sh install_chrome_ext.sh chrome-ext/manifest.json relay/minimax_relay.py docs/TRIAL_RELAY.md docs/PROVIDERS.md; do
   [[ -f "$PROJECT_DIR/$file" ]] && ok "$file exists" || fail "$file missing"
 done
 
 section "TTS Provider"
-if [[ -f "$HOME/.serenity_env" ]] && grep -q '^MINIMAX_API_KEY=' "$HOME/.serenity_env"; then
-  ok "MiniMax key found in ~/.serenity_env"
-elif [[ -f "$HOME/.serenity_env" ]] && grep -q '^TTS_SAY_RELAY_URL=' "$HOME/.serenity_env"; then
-  ok "Trial relay URL found in ~/.serenity_env"
+if [[ -f "$PROJECT_DIR/.env" ]] && grep -Eq '^MINIMAX_API_KEY=.+$' "$PROJECT_DIR/.env"; then
+  ok "MiniMax key found in .env"
+elif [[ -f "$PROJECT_DIR/.env" ]] && grep -Eq '^TTS_SAY_RELAY_URL=.+$' "$PROJECT_DIR/.env"; then
+  ok "Trial relay URL found in .env"
+elif [[ -f "$HOME/.serenity_env" ]] && grep -Eq '^MINIMAX_API_KEY=.+$' "$HOME/.serenity_env"; then
+  ok "MiniMax key found in legacy ~/.serenity_env"
+elif [[ -f "$HOME/.serenity_env" ]] && grep -Eq '^TTS_SAY_RELAY_URL=.+$' "$HOME/.serenity_env"; then
+  ok "Trial relay URL found in legacy ~/.serenity_env"
 elif command -v say >/dev/null 2>&1; then
-  warn "MiniMax key not found; macOS system voice fallback is available for first-run demos"
+  warn "MiniMax key not found; copy .env.example to .env and fill it in, or use macOS system voice for first-run demos"
 else
   fail "No MiniMax key, trial relay, or macOS say fallback available"
 fi

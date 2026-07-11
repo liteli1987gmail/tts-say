@@ -16,7 +16,7 @@ Help the user get tts-say working on macOS with the least manual configuration p
 
 Keep the shell installer as the source of truth for deterministic setup. Use MCP tools when available; otherwise run the repository scripts.
 
-Default provider is MiniMax. For ordinary setup, configure `MINIMAX_API_KEY` in `~/.serenity_env`. If the user asks to use another TTS vendor, read `docs/PROVIDERS.md` before editing; provider changes belong in `tts_say.py` and diagnostics, not in Chrome extension or hook files.
+Default provider is MiniMax. For ordinary setup, copy `.env.example` to `.env` and configure `MINIMAX_API_KEY` there. If the user asks to use another TTS vendor, read `docs/PROVIDERS.md` before editing; provider changes belong in `tts_say.py` and diagnostics, not in Chrome extension or hook files.
 
 ## Locate The Project
 
@@ -80,7 +80,7 @@ Call `play_test_audio` only when the user expects sound or asks for an audio tes
 ## Diagnosis Hints
 
 - `server_not_responding`: restart the LaunchAgent or run `./install.sh --no-test-audio --no-chrome-ext`.
-- `missing_minimax_key`: ask the user to provide or add `MINIMAX_API_KEY` to `~/.serenity_env`; do not invent a key.
+- `missing_minimax_key`: ask the user to provide or add `MINIMAX_API_KEY` to project `.env`; do not invent a key.
 - `using_macos_system_voice_fallback`: this is acceptable for a first-run demo; explain that MiniMax quality requires either the user's key or a trial relay token.
 - `chrome_extension_not_loaded`: run `./install_chrome_ext.sh` if Chrome exists.
 - `claude_hook_not_configured` or `codex_notify_not_configured`: run `./install.sh --no-test-audio --no-chrome-ext`.

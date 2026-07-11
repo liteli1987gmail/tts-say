@@ -7,7 +7,7 @@
     python3 tts_say.py --no-interrupt "排队播放，不打断上一条"
 
 行为:
-    - 音色 female-tianmei (speech-02-hd)，密钥读 ~/.serenity_env
+    - 音色 female-tianmei (speech-02-hd)，密钥优先读项目 .env
     - 清洗 markdown：代码块替换为"代码略"，去掉 URL、表格线、行内符号
     - 默认打断正在播放的上一条（聊天场景新回复优先）
     - 文本超过 MAX_CHARS 截断并追加提示
@@ -27,23 +27,29 @@ VOICE_ID = "female-tianmei"
 MODEL = "speech-02-hd"
 RUNTIME_DIR = Path(__file__).resolve().parent / ".runtime"
 PID_FILE = RUNTIME_DIR / "afplay.pid"
-ENV_FILE = Path.home() / ".serenity_env"
+PROJECT_DIR = Path(__file__).resolve().parent
+ENV_FILE = PROJECT_DIR / ".env"
+LEGACY_ENV_FILE = Path.home() / ".serenity_env"
 
 
 def load_env():
-    if not ENV_FILE.exists():
-        return
-    for line in ENV_FILE.read_text().splitlines():
-        if "=" in line and not line.startswith("#"):
-            k, v = line.split("=", 1)
-            os.environ.setdefault(k.strip(), v.strip())
+    for env_file in (ENV_FILE, LEGACY_ENV_FILE):
+        if not env_file.exists():
+            continue
+        for line in env_file.read_text().splitlines():
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                key = k.strip()
+                value = v.strip()
+                if value and not os.environ.get(key):
+                    os.environ[key] = value
 
 
 def load_key(required=True):
     load_env()
     key = os.environ.get("MINIMAX_API_KEY", "").strip()
     if required and not key:
-        raise RuntimeError(f"MINIMAX_API_KEY is missing. Add it to {ENV_FILE} or use macOS fallback.")
+        raise RuntimeError("MINIMAX_API_KEY is missing. Copy .env.example to .env and fill it in, or use macOS fallback.")
     return key
 
 

@@ -3,7 +3,7 @@
 This project defaults to MiniMax. Other AI agents working on this repo should follow this rule:
 
 ```text
-Default setup = configure MINIMAX_API_KEY in ~/.serenity_env.
+Default setup = copy .env.example to .env and configure MINIMAX_API_KEY there.
 Do not change Chrome extension, Claude hook, or Codex hook for provider changes.
 Provider changes belong in the local TTS layer.
 ```
@@ -19,7 +19,7 @@ MINIMAX_API_KEY=...
 in:
 
 ```text
-~/.serenity_env
+.env
 ```
 
 The default MiniMax settings live in `tts_say.py`:

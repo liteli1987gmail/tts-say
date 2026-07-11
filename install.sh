@@ -6,7 +6,9 @@ PROJECT_DIR="${0:A:h}"
 LABEL="com.terri.tts-say"
 PORT="48765"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
-ENV_FILE="$HOME/.serenity_env"
+ENV_FILE="$PROJECT_DIR/.env"
+ENV_EXAMPLE_FILE="$PROJECT_DIR/.env.example"
+LEGACY_ENV_FILE="$HOME/.serenity_env"
 RUNTIME_DIR="$PROJECT_DIR/.runtime"
 
 RUN_TEST_AUDIO=1
@@ -58,31 +60,46 @@ ensure_dependencies() {
   log "Checking local dependencies"
   require_command python3
   require_command afplay
+  require_command say
   require_command curl
   [[ -f "$PROJECT_DIR/tts_say.py" ]] || die "Cannot find $PROJECT_DIR/tts_say.py"
   [[ -f "$PROJECT_DIR/tts_server.py" ]] || die "Cannot find $PROJECT_DIR/tts_server.py"
-  ok "python3, afplay, curl are available"
+  ok "python3, afplay, say, curl are available"
 }
 
 ensure_minimax_key() {
   log "Checking TTS provider"
-  if [[ -f "$ENV_FILE" ]] && grep -q '^MINIMAX_API_KEY=' "$ENV_FILE"; then
+  if [[ ! -f "$ENV_FILE" && -f "$ENV_EXAMPLE_FILE" ]]; then
+    cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
+    chmod 600 "$ENV_FILE"
+    ok "Created $ENV_FILE from .env.example"
+  fi
+
+  if [[ -f "$ENV_FILE" ]] && grep -Eq '^MINIMAX_API_KEY=.+$' "$ENV_FILE"; then
     ok "Found MINIMAX_API_KEY in $ENV_FILE"
     return
   fi
-  if [[ -f "$ENV_FILE" ]] && grep -q '^TTS_SAY_RELAY_URL=' "$ENV_FILE"; then
+  if [[ -f "$ENV_FILE" ]] && grep -Eq '^TTS_SAY_RELAY_URL=.+$' "$ENV_FILE"; then
     ok "Found TTS_SAY_RELAY_URL in $ENV_FILE"
+    return
+  fi
+  if [[ -f "$LEGACY_ENV_FILE" ]] && grep -Eq '^MINIMAX_API_KEY=.+$' "$LEGACY_ENV_FILE"; then
+    ok "Found MINIMAX_API_KEY in legacy $LEGACY_ENV_FILE"
+    return
+  fi
+  if [[ -f "$LEGACY_ENV_FILE" ]] && grep -Eq '^TTS_SAY_RELAY_URL=.+$' "$LEGACY_ENV_FILE"; then
+    ok "Found TTS_SAY_RELAY_URL in legacy $LEGACY_ENV_FILE"
     return
   fi
 
   if [[ "$REQUIRE_MINIMAX_KEY" != "1" ]]; then
     warn "MiniMax key not found. First-run demo will use macOS system voice."
-    warn "Add MINIMAX_API_KEY or TTS_SAY_RELAY_URL later for MiniMax-quality audio."
+    warn "Fill $ENV_FILE later with MINIMAX_API_KEY or TTS_SAY_RELAY_URL for MiniMax-quality audio."
     return
   fi
 
   if [[ ! -t 0 ]]; then
-    die "MINIMAX_API_KEY is missing. Add it to $ENV_FILE, then run ./install.sh again."
+    die "MINIMAX_API_KEY is missing. Fill $ENV_FILE, then run ./install.sh again."
   fi
 
   print -n "Enter MINIMAX_API_KEY: "
@@ -94,11 +111,23 @@ ensure_minimax_key() {
 
   touch "$ENV_FILE"
   chmod 600 "$ENV_FILE"
-  {
-    print ""
-    print "# Added by tts-say installer"
-    print "MINIMAX_API_KEY=$key"
-  } >> "$ENV_FILE"
+  /usr/bin/python3 - "$ENV_FILE" "$key" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+key = sys.argv[2]
+lines = path.read_text().splitlines() if path.exists() else []
+updated = False
+for index, line in enumerate(lines):
+    if line.startswith("MINIMAX_API_KEY="):
+        lines[index] = f"MINIMAX_API_KEY={key}"
+        updated = True
+        break
+if not updated:
+    lines.append(f"MINIMAX_API_KEY={key}")
+path.write_text("\n".join(lines) + "\n")
+PY
   ok "Saved MINIMAX_API_KEY to $ENV_FILE"
 }
 

@@ -21,7 +21,9 @@ LABEL = "com.terri.tts-say"
 PORT = 48765
 PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
 RUNTIME_DIR = PROJECT_DIR / ".runtime"
-ENV_FILE = Path.home() / ".serenity_env"
+ENV_FILE = PROJECT_DIR / ".env"
+ENV_EXAMPLE_FILE = PROJECT_DIR / ".env.example"
+LEGACY_ENV_FILE = Path.home() / ".serenity_env"
 
 
 def command_exists(name: str) -> bool:
@@ -50,24 +52,28 @@ def file_contains(path: Path, needle: str) -> bool:
 
 
 def has_minimax_key() -> bool:
-    try:
-        for line in ENV_FILE.read_text(errors="replace").splitlines():
-            if line.startswith("MINIMAX_API_KEY=") and line.split("=", 1)[1].strip():
-                return True
-    except OSError:
-        return False
+    for env_file in (ENV_FILE, LEGACY_ENV_FILE):
+        try:
+            for line in env_file.read_text(errors="replace").splitlines():
+                if line.startswith("MINIMAX_API_KEY=") and line.split("=", 1)[1].strip():
+                    return True
+        except OSError:
+            pass
     return bool(os.environ.get("MINIMAX_API_KEY"))
 
 
 def env_value(name: str) -> str:
     if os.environ.get(name):
         return os.environ[name].strip()
-    try:
-        for line in ENV_FILE.read_text(errors="replace").splitlines():
-            if line.startswith(f"{name}="):
-                return line.split("=", 1)[1].strip()
-    except OSError:
-        pass
+    for env_file in (ENV_FILE, LEGACY_ENV_FILE):
+        try:
+            for line in env_file.read_text(errors="replace").splitlines():
+                if line.startswith(f"{name}="):
+                    value = line.split("=", 1)[1].strip()
+                    if value:
+                        return value
+        except OSError:
+            pass
     return ""
 
 
@@ -169,6 +175,7 @@ def tail(path: Path, lines: int = 40) -> list[str]:
 
 def collect_status(include_logs: bool = False) -> dict[str, Any]:
     required_files = [
+        ".env.example",
         "tts_say.py",
         "tts_server.py",
         "claude_stop_hook.py",
@@ -222,6 +229,8 @@ def collect_status(include_logs: bool = False) -> dict[str, Any]:
         "files": {file_name: (PROJECT_DIR / file_name).exists() for file_name in required_files},
         "minimax": {
             "env_file": str(ENV_FILE),
+            "env_example_file": str(ENV_EXAMPLE_FILE),
+            "legacy_env_file": str(LEGACY_ENV_FILE),
             "key_present": minimax_key_present,
         },
         "relay": {

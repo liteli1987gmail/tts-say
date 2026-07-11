@@ -34,7 +34,8 @@ python3 relay/minimax_relay.py
 Then configure a client:
 
 ```sh
-cat >> ~/.serenity_env <<'EOF'
+cp .env.example .env
+cat >> .env <<'EOF'
 TTS_SAY_RELAY_URL=https://your-domain.example/say
 TTS_SAY_TRIAL_TOKEN=demo-user-1
 EOF
