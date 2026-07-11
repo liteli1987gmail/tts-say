@@ -17,8 +17,15 @@ The default TTS provider is MiniMax. First-run demos can use the built-in macOS 
 ```sh
 git clone https://github.com/liteli1987gmail/tts-say.git
 cd tts-say
-cp .env.example .env
 ./install.sh
+```
+
+## Configure MiniMax Key
+
+Create a local `.env` file:
+
+```sh
+cp .env.example .env
 ```
 
 Open `.env` and fill in your own `MINIMAX_API_KEY` for MiniMax audio. You can leave it blank for a first-run demo with the built-in macOS voice.
@@ -26,7 +33,7 @@ Open `.env` and fill in your own `MINIMAX_API_KEY` for MiniMax audio. You can le
 The installer handles:
 
 - macOS, Python, `afplay`, `say`, and `curl` checks
-- `.env` creation from `.env.example`
+- `.env` creation from `.env.example` when `.env` is missing
 - `MINIMAX_API_KEY` detection in `.env`
 - macOS `say` voice for first-run demos
 - LaunchAgent installation at `~/Library/LaunchAgents/com.terri.tts-say.plist`
